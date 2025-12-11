@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card shadow-lg border-0">
+                <!-- Profile Header with Circular Picture -->
+                <div class="card-header bg-primary text-white text-center py-5 position-relative">
+                    <div class="profile-pic-container">
+                        {% if profile.profile_pic %}
+                            <img src="{{ profile.profile_pic.url }}" 
+                                 alt="{{ profile.user.full_name }}" 
+                                 class="rounded-circle shadow-lg img-fluid profile-pic">
+                        {% else %}
+                            <div class="rounded-circle bg-light shadow-lg d-flex align-items-center justify-content-center profile-pic">
+                                <i class="fas fa-user fa-5x text-muted"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <h3 class="mt-4 mb-1">{{ profile.user.full_name }}</h3>
+                    <p class="mb-0">{{ profile.user.get_role_display }}</p>
+                </div>
+
+                <div class="card-body p-5">
+                    <div class="row g-4">
+                        <!-- Basic Info -->
+                        <div class="col-12">
+                            <h5 class="mb-3"><i class="fas fa-info-circle mr-2"></i> Basic Information</h5>
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item d-flex justify-content-between">
+                                    <strong>Username:</strong> {{ profile.user.username }}
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between">
+                                    <strong>Email:</strong> {{ profile.user.email }}
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between">
+                                    <strong>Phone:</strong> {{ profile.phone_number|default:"Not provided" }}
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between">
+                                    <strong>Profile Visibility:</strong> {{ profile.profile_visibility }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bio -->
+                        {% if profile.bio %}
+                        <div class="col-12">
+                            <h5 class="mb-3"><i class="fas fa-comment-dots mr-2"></i> Bio</h5>
+                            <p class="bg-light p-3 rounded">{{ profile.bio|linebreaks }}</p>
+                        </div>
+                        {% endif %}
+
+                        <!-- Skills (safe version - no split filter) -->
+                        {% if profile.skills %}
+                        <div class="col-12">
+                            <h5 class="mb-3"><i class="fas fa-tools mr-2"></i> Skills</h5>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for skill in profile.skills|linebreaksbr %}
+                                    {% if skill.strip %}
+                                        <span class="badge bg-primary">{{ skill.strip }}</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Education & Experience -->
+                        <div class="col-md-6">
+                            {% if profile.education %}
+                            <h5 class="mb-3"><i class="fas fa-graduation-cap mr-2"></i> Education</h5>
+                            <p class="bg-light p-3 rounded">{{ profile.education|linebreaks }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if profile.experience %}
+                            <h5 class="mb-3"><i class="fas fa-briefcase mr-2"></i> Experience</h5>
+                            <p class="bg-light p-3 rounded">{{ profile.experience|linebreaks }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Resume -->
+                        {% if profile.resume %}
+                        <div class="col-12">
+                            <h5 class="mb-3"><i class="fas fa-file-alt mr-2"></i> Resume</h5>
+                            <a href="{{ profile.resume.url }}" target="_blank" class="btn btn-outline-primary">
+                                <i class="fas fa-download mr-2"></i> Download Resume
+                            </a>
+                            {% if profile.resume_upload_date %}
+                                <small class="text-muted d-block mt-2">
+                                    Uploaded on {{ profile.resume_upload_date|date:"F j, Y, g:i a" }}
+                                </small>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Last Updated -->
+                        <div class="col-12 text-center mt-4">
+                            <small class="text-muted">
+                                Last updated: {{ profile.last_updated|date:"F j, Y, g:i a" }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer text-center text-muted">
+                    <small>Profile shared publicly</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Styles for Circular Profile Pic -->
+<style>
+    .profile-pic-container {
+        position: relative;
+        top: 0;
+        transform: translateY(-50%);
+    }
+    .profile-pic {
+        width: 180px;
+        height: 180px;
+        object-fit: cover;
+        border: 6px solid #fff;
+        transition: transform 0.3s ease;
+    }
+    .profile-pic:hover {
+        transform: scale(1.08);
+    }
+    .card-header {
+        border-bottom: none;
+        padding-bottom: 100px !important; /* Space for picture */
+    }
+</style>
+
+{% endblock %}

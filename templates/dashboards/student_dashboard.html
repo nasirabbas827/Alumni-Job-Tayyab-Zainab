@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h3 class="mb-0">
+            <i class="fas fa-user mr-2"></i>
+            Welcome, {{ user.full_name }} (Student)
+        </h3>
+        <small class="text-muted">Your personalized job search dashboard</small>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-5">
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-info">
+            <div class="card-body text-center">
+                <h5 class="text-info mb-1">Jobs Applied To</h5>
+                <h3 class="font-weight-bold">{{ total_applied_jobs }}</h3>
+                <small class="text-muted">total applications</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-success">
+            <div class="card-body text-center">
+                <h5 class="text-success mb-1">Bookmarked Jobs</h5>
+                <h3 class="font-weight-bold">{{ total_bookmarked_jobs }}</h3>
+                <small class="text-muted">saved for later</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-primary">
+            <div class="card-body text-center">
+                <h5 class="text-primary mb-1">Suggested Matches</h5>
+                <h3 class="font-weight-bold">{{ suggested_jobs|length }}</h3>
+                <small class="text-muted">based on your skills</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-warning">
+            <div class="card-body text-center">
+                <h5 class="text-warning mb-1">Pending Applications</h5>
+                <h3 class="font-weight-bold">{{ pending_applications_count }}</h3>
+                <small class="text-muted">awaiting response</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Application Status Pie Chart -->
+<div class="row mb-5">
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-chart-pie mr-2"></i> Your Application Status</h5>
+            </div>
+            <div class="card-body">
+                {% if total_applied_jobs > 0 %}
+                    <canvas id="applicationStatusChart" height="200"></canvas>
+                {% else %}
+                    <p class="text-center text-muted py-5">You haven't applied to any jobs yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-list mr-2"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'job_board' %}" class="btn btn-success btn-lg m-2">
+                        <i class="fas fa-briefcase mr-2"></i> Browse Job Board
+                    </a>
+                    <a href="{% url 'my_applied_jobs' %}" class="btn btn-primary btn-lg m-2">
+                        <i class="fas fa-paper-plane mr-2"></i> View My Applications
+                    </a>
+                    <a href="{% url 'update_profile' %}" class="btn btn-info btn-lg m-2">
+                        <i class="fas fa-user-edit mr-2"></i> Update Profile & Skills
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Your Job Applications -->
+<h5 class="mb-3"><i class="fas fa-paper-plane mr-2"></i> Your Job Applications</h5>
+<div class="table-responsive mb-5">
+    <table class="table table-hover table-bordered">
+        <thead class="thead-light">
+            <tr>
+                <th>Job Title</th>
+                <th>Posted By</th>
+                <th>Status</th>
+                <th>Applied On</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for application in applications %}
+            <tr>
+                <td>{{ application.job.title }}</td>
+                <td>{{ application.job.posted_by.full_name }}</td>
+                <td>
+                    {% if application.status == 'applied' %}
+                        <span class="badge badge-info">{{ application.get_status_display }}</span>
+                    {% elif application.status == 'shortlisted' %}
+                        <span class="badge badge-warning">{{ application.get_status_display }}</span>
+                    {% elif application.status == 'interviewed' %}
+                        <span class="badge badge-primary">{{ application.get_status_display }}</span>
+                    {% elif application.status == 'rejected' %}
+                        <span class="badge badge-danger">{{ application.get_status_display }}</span>
+                    {% elif application.status == 'hired' %}
+                        <span class="badge badge-success">{{ application.get_status_display }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ application.applied_at|date:"Y-m-d" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center text-muted py-4">
+                    You haven't applied to any jobs yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Suggested Jobs -->
+<h5 class="mb-3"><i class="fas fa-lightbulb mr-2"></i> Suggested Jobs Based on Your Skills</h5>
+<div class="table-responsive">
+    <table class="table table-hover table-bordered">
+        <thead class="thead-light">
+            <tr>
+                <th>Job Title</th>
+                <th>Posted By</th>
+                <th>Location</th>
+                <th>Type</th>
+                <th>Required Skills</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for job in suggested_jobs %}
+            <tr>
+                <td>{{ job.title }}</td>
+                <td>{{ job.posted_by.full_name }}</td>
+                <td>{{ job.location }}</td>
+                <td>{{ job.get_job_type_display }}</td>
+                <td>{{ job.required_skills }}</td>
+                <td>
+                    {% if job.id in applied_job_ids %}
+                        <span class="badge badge-info">Applied</span>
+                    {% else %}
+                        <a href="{% url 'apply_job' job.id %}" class="btn btn-success btn-sm">Apply</a>
+                    {% endif %}
+                    {% if job.id in bookmarked_job_ids %}
+                        <a href="{% url 'toggle_bookmark' job.id %}" class="btn btn-warning btn-sm">Unbookmark</a>
+                    {% else %}
+                        <a href="{% url 'toggle_bookmark' job.id %}" class="btn btn-primary btn-sm">Bookmark</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center text-muted py-4">
+                    No suggested jobs found based on your skills.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Chart.js for Application Status Pie Chart -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    {% if total_applied_jobs > 0 %}
+    const ctx = document.getElementById('applicationStatusChart').getContext('2d');
+    const applicationStatusChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Applied', 'Shortlisted', 'Interviewed', 'Rejected', 'Hired'],
+            datasets: [{
+                data: [
+                    {{ applied_count }},
+                    {{ shortlisted_count }},
+                    {{ interviewed_count }},
+                    {{ rejected_count }},
+                    {{ hired_count }}
+                ],
+                backgroundColor: [
+                    '#17a2b8',  // Applied - info
+                    '#ffc107',  // Shortlisted - warning
+                    '#007bff',  // Interviewed - primary
+                    '#dc3545',  // Rejected - danger
+                    '#28a745'   // Hired - success
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            if (label) label += ': ';
+                            label += context.raw;
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    {% endif %}
+</script>
+
+{% endblock %}

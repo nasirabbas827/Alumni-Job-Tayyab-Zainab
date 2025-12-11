@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-5 col-md-7">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white text-center py-4">
+                    <h3 class="mb-0">
+                        <i class="fas fa-sign-in-alt mr-2"></i>
+                        Login
+                    </h3>
+                    <p class="mb-0">Welcome back to Alumni Job Portal</p>
+                </div>
+
+                <div class="card-body p-4">
+                    <!-- Messages -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert 
+                                {% if message.tags == 'error' %}alert-danger
+                                {% elif message.tags == 'success' %}alert-success
+                                {% elif message.tags == 'warning' %}alert-warning
+                                {% else %}alert-info{% endif %} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="POST" novalidate>
+                        {% csrf_token %}
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="{{ form.email.id_for_label }}" class="form-label fw-bold">
+                                    {{ form.email.label }}
+                                </label>
+                                {{ form.email }}
+                                {{ form.email.errors }}
+                            </div>
+
+                            <div class="col-12">
+                                <label for="{{ form.password.id_for_label }}" class="form-label fw-bold">
+                                    {{ form.password.label }}
+                                </label>
+                                {{ form.password }}
+                                {{ form.password.errors }}
+                            </div>
+
+                            <div class="col-12 text-center mt-4">
+                                <button type="submit" class="btn btn-success btn-lg px-5">
+                                    <i class="fas fa-sign-in-alt mr-2"></i> Login
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <p class="mb-0">
+                            Don't have an account? 
+                            <a href="{% url 'register' %}" class="text-primary">Register here</a>
+
+                        </p>
+                        <div class="text-center mt-3">
+    <a href="{% url 'password_reset' %}" class="text-primary">Forgot your password?</a>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

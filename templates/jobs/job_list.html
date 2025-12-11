@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Your Job Listings</h2>
+    <a href="{% url 'job_create' %}" class="btn btn-success mb-3">Post New Job</a>
+
+    {% if jobs %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Deadline</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for job in jobs %}
+                    <tr>
+                        <td>{{ job.title }}</td>
+                        <td>{{ job.get_job_type_display }}</td>
+                        <td>{{ job.get_status_display }}</td>
+                        <td>{{ job.deadline }}</td>
+                        <td>
+                            <a href="{% url 'job_update' job.id %}" class="btn btn-primary btn-sm">Edit</a>
+                            <a href="{% url 'job_delete' job.id %}" class="btn btn-danger btn-sm">Delete</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No jobs posted yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

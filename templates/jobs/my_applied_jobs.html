@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h3>My Applied Jobs</h3>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Job Title</th>
+            <th>Company</th>
+            <th>Location</th>
+            <th>Type</th>
+            <th>Skills</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for app in applications %}
+        <tr>
+            <td>{{ app.job.title }}</td>
+            <td>{{ app.job.posted_by.full_name }}</td>
+            <td>{{ app.job.location }}</td>
+            <td>{{ app.job.get_job_type_display }}</td>
+            <td>{{ app.job.required_skills }}</td>
+            <td>{{ app.get_status_display }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6" class="text-center">You have not applied to any jobs yet.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

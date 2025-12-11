@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h3 class="mb-0">
+            <i class="fas fa-briefcase mr-2"></i>
+            Welcome, {{ user.full_name }} (Employer)
+        </h3>
+        {% if user.profile.company_name %}
+            <small class="text-muted">Managing jobs for: <strong>{{ user.profile.company_name }}</strong></small>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-5">
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-primary">
+            <div class="card-body text-center">
+                <h5 class="text-primary mb-1">Total Jobs Posted</h5>
+                <h3 class="font-weight-bold">{{ total_jobs_posted }}</h3>
+                <small class="text-muted">by you</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-success">
+            <div class="card-body text-center">
+                <h5 class="text-success mb-1">Applications Received</h5>
+                <h3 class="font-weight-bold">{{ total_applications_received }}</h3>
+                <small class="text-muted">across all jobs</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-info">
+            <div class="card-body text-center">
+                <h5 class="text-info mb-1">Approved Jobs</h5>
+                <h3 class="font-weight-bold">{{ approved_jobs_count }}</h3>
+                <small class="text-muted">live on portal</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm border-warning">
+            <div class="card-body text-center">
+                <h5 class="text-warning mb-1">Pending Jobs</h5>
+                <h3 class="font-weight-bold">{{ pending_jobs_count }}</h3>
+                <small class="text-muted">awaiting approval</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Job Status Pie Chart -->
+<div class="row mb-5">
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-chart-pie mr-2"></i> Your Job Postings Status</h5>
+            </div>
+            <div class="card-body">
+                {% if total_jobs_posted > 0 %}
+                    <canvas id="jobStatusChart" height="200"></canvas>
+                {% else %}
+                    <p class="text-center text-muted py-5">You haven't posted any jobs yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-list mr-2"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'job_create' %}" class="btn btn-success btn-lg">
+                        <i class="fas fa-plus mr-2"></i> Post a New Job
+                    </a>
+                    <a href="{% url 'my_job_applications' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-inbox mr-2"></i> View All Applications
+                    </a>
+                    <a href="{% url 'job_list' %}" class="btn btn-info btn-lg m-2">
+                        <i class="fas fa-briefcase mr-2"></i> Manage My Jobs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Job Postings -->
+<h5 class="mb-3"><i class="fas fa-briefcase mr-2"></i> Your Recent Job Postings</h5>
+<div class="table-responsive mb-5">
+    <table class="table table-hover table-bordered">
+        <thead class="thead-light">
+            <tr>
+                <th>Title</th>
+                <th>Location</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Applications</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for job in recent_jobs %}
+            <tr>
+                <td>{{ job.title }}</td>
+                <td>{{ job.location }}</td>
+                <td>{{ job.get_job_type_display }}</td>
+                <td>
+                    {% if job.status == 'pending' %}
+                        <span class="badge badge-warning">Pending</span>
+                    {% elif job.status == 'approved' %}
+                        <span class="badge badge-success">Approved</span>
+                    {% elif job.status == 'rejected' %}
+                        <span class="badge badge-danger">Rejected</span>
+                    {% endif %}
+                </td>
+                <td>{{ job.applications_count }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center text-muted py-4">
+                    You haven't posted any jobs yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Chart.js for Pie Chart -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    {% if total_jobs_posted > 0 %}
+    const ctx = document.getElementById('jobStatusChart').getContext('2d');
+    const jobStatusChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Pending', 'Approved', 'Rejected'],
+            datasets: [{
+                data: [{{ pending_jobs_count }}, {{ approved_jobs_count }}, {{ rejected_jobs_count }}],
+                backgroundColor: [
+                    '#ffc107',  // Pending
+                    '#28a745',  // Approved
+                    '#dc3545'   // Rejected
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            if (label) label += ': ';
+                            label += context.raw;
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    {% endif %}
+</script>
+
+{% endblock %}
