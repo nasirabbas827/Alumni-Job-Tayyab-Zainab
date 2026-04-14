@@ -45,7 +45,6 @@
         .nav-link {
             color: rgba(255,255,255,0.9) !important;
             font-weight: 500;
-            padding: 0.6rem 1rem !important;
             transition: all 0.3s ease;
         }
 
@@ -79,13 +78,7 @@
             background-color: #dc3545 !important;
         }
 
-        .content-wrapper {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
+
 
         footer {
             background-color: #343a40;
@@ -160,27 +153,27 @@
                     {% if request.session.role == 'alumni' %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'alumni_dashboard' %}">
-                                <i class="fas fa-tachometer-alt mr-1"></i> Alumni Dashboard
+                                 Alumni Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link post-job" href="{% url 'job_list' %}">
-                                <i class="fas fa-plus mr-1"></i> Post Jobs
+                                Post Jobs
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'job_board' %}">
-                                <i class="fas fa-briefcase mr-1"></i> Job Board
+                                 Job Board
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'my_applied_jobs' %}">
-                                <i class="fas fa-paper-plane mr-1"></i> My Applied Jobs
+                                  My Applied Jobs
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'my_job_applications' %}">
-                                <i class="fas fa-inbox mr-1"></i> Applications Received
+                                Applications Received
                             </a>
                         </li>
 
@@ -221,7 +214,7 @@
 
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'update_profile' %}">
-                            <i class="fas fa-user mr-1"></i> Profile
+                             Profile
                         </a>
                     </li>
                     
@@ -270,7 +263,7 @@
 <!-- Footer -->
 <footer>
     <div class="container">
-        <p>&copy; 2025 Alumni Job Portal. All rights reserved.</p>
+        <p>&copy; 2026 Alumni Job Portal. All rights reserved.</p>
     </div>
 </footer>
 

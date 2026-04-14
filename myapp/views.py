@@ -4,7 +4,6 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
-
 from .models import CustomUser, Profile, Job, JobApplication, JobBookmark
 from .forms import RegisterForm, LoginForm, ProfileForm, JobForm, JobApplicationForm
 
@@ -13,29 +12,27 @@ def index(request):
     jobs = Job.objects.filter(status='approved').order_by('-posted_at')[:6]
     return render(request, 'index.html', {'jobs': jobs})
 
-# --------------------- REGISTRATION & VERIFICATION ---------------------
 def register(request):
-    """
-    Handles user registration.
-    - Validates form
-    - Checks for duplicate email
-    - Sets status to 'pending'
-    - Sends verification email (SMTP)
-    """
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data['email']
+            username = form.cleaned_data['username']
 
+            # Check for duplicate email
             if CustomUser.objects.filter(email=email).exists():
-                messages.error(request, "This email is already registered.")
-                return redirect('register')
+                form.add_error('email', "This email is already registered.")
+                return render(request, 'register.html', {'form': form})
+
+            # Check for duplicate username
+            if CustomUser.objects.filter(username=username).exists():
+                form.add_error('username', "This username is already taken.")
+                return render(request, 'register.html', {'form': form})
 
             user = form.save(commit=False)
             user.status = 'pending'
             user.save()
 
-            # Generate verification link (use your actual domain in production)
             verification_link = f"http://127.0.0.1:8000/verify-email/?email={email}"
 
             try:
@@ -62,6 +59,7 @@ def register(request):
         form = RegisterForm()
 
     return render(request, 'register.html', {'form': form})
+
 
 
 def verify_email(request):
